@@ -1,9 +1,9 @@
 # Local .terraform directories
 **/.terraform/*
-
+**/credentials.txt
 # .tfstate files
-*.tfstate
-*.tfstate.*
+**/charts
+**/requirements.lock
 
 # Crash log files
 crash.log

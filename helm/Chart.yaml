@@ -1,0 +1,11 @@
+apiVersion: v1
+appVersion: 1.11.0
+description: Crossplane is an open source Kubernetes add-on that enables platform
+  teams to assemble infrastructure from multiple vendors, and expose higher level
+  self-service APIs for application teams to consume.
+name: crossplane
+version: 1.11.0
+dependencies:
+  - name: crossplane
+    repository: https://charts.crossplane.io/stable
+    version: 1.11.0

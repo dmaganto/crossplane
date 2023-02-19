@@ -11,6 +11,7 @@ helm install crossplane --namespace crossplane-system crossplane-stable/crosspla
 ````
 ### Configure credentials
 
+
 Create a file `credentials.txt`:
 
 ```yaml

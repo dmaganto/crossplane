@@ -1,0 +1,6 @@
+apiVersion: my-api.dmaganto.es/v1alpha1
+kind: XDatabase
+metadata:
+  name: test
+spec: 
+  region: "EU"

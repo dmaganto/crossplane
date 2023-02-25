@@ -1,0 +1,7 @@
+apiVersion: my-api.dmaganto.es/v1alpha1
+kind: Database
+metadata:
+  name: test-2
+  namespace: test-2
+spec: 
+  region: "EU"

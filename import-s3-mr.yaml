@@ -1,0 +1,12 @@
+apiVersion: s3.aws.crossplane.io/v1beta1
+kind: Bucket
+metadata:
+  annotations:
+    crossplane.io/external-name: spin-v1
+  name: import-bucket-spin-v1
+spec:
+  forProvider:
+    acl: private
+    locationConstraint: eu-west-1
+  providerConfigRef:
+    name: provider-config-aws

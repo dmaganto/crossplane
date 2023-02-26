@@ -60,5 +60,15 @@ spec:
       type: Dynamic
 EOF
 ```
+### Notes
+1. Create composition
+2. Create the CRD (a.k.a XRD) that using prior composition `1`
+3. Create the XMR using composition `1` and XRD `2` (non namespaced)
+4. Create another XMR using composition `1` and XRD `2` (non namespaced)
+5. Create claim using composition `1` and XRD `2` (namespaced)
+7. Create composition with parameters
+8. Create claim using composition `7` and XRD `2` (namespaced)
 
-
+## Documentation
+* [AWS Crossplane on EKS](https://github.com/awslabs/crossplane-on-eks.git)
+* [Crossplane first look](https://blog.upbound.io/crossplane-first-look/)

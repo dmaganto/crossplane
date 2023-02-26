@@ -1,0 +1,18 @@
+apiVersion: dynamodb.aws.crossplane.io/v1alpha1
+kind: Table
+metadata:
+  annotations:
+    crossplane.io/external-name: lock-tf #force-naming
+  name: import-dynamo-lock-tf
+spec:
+  #deletionPolicy: Orphan
+  forProvider:
+    region: eu-west-1
+    attributeDefinitions:
+      - attributeName: LockID
+        attributeType: S
+    keySchema:
+      - attributeName: LockID
+        keyType: HASH
+  providerConfigRef:
+    name: provider-config-aws

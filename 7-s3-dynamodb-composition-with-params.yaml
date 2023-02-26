@@ -35,9 +35,17 @@ spec:
                   filter:
                     prefix: ola/
                   status: Enabled
-            locationConstraint: eu-west-1
+            locationConstraint:
           providerConfigRef:
             name: provider-config-aws
+      patches:
+        - fromFieldPath: "spec.region"
+          toFieldPath: "spec.forProvider.locationConstraint"
+          transforms:
+            - type: map
+              map: 
+                EU: "eu-west-1"
+                US: "us-east-1"
     - name: dynamodb
       base:
         apiVersion: dynamodb.aws.crossplane.io/v1alpha1
@@ -55,6 +63,14 @@ spec:
             provisionedThroughput:
               readCapacityUnits: 1
               writeCapacityUnits: 1
-            region: eu-west-1
+            region:
           providerConfigRef:
             name: provider-config-aws
+      patches:
+        - fromFieldPath: "spec.region"
+          toFieldPath: "spec.forProvider.region"
+          transforms:
+            - type: map
+              map: 
+                EU: "eu-west-1"
+                US: "us-east-1"

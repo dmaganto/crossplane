@@ -1,0 +1,78 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: dynamodb-with-bucket
+  labels:
+    region: US
+spec:
+  compositeTypeRef:
+    apiVersion: my-api.dmaganto.es/v1alpha1
+    kind: XDatabase
+  resources:
+    - name: s3-bucket
+      base:
+        apiVersion: s3.aws.crossplane.io/v1beta1
+        kind: Bucket
+        metadata:
+          name: s3-bucket
+        spec:
+          forProvider:
+            accelerateConfiguration:
+              status: Enabled
+            acl: private
+            corsConfiguration:
+              corsRules:
+                - allowedHeaders:
+                    - "*"
+                  allowedMethods:
+                    - GET
+                  allowedOrigins:
+                    - "*"
+                  exposeHeaders:
+                    - x-amz-server-side-encryption
+            lifecycleConfiguration:
+              rules:
+                - expiration:
+                    days: 15
+                  filter:
+                    prefix: ola/
+                  status: Enabled
+            locationConstraint:
+          providerConfigRef:
+            name: provider-config-aws
+      patches:
+        - fromFieldPath: "spec.region"
+          toFieldPath: "spec.forProvider.locationConstraint"
+          transforms:
+            - type: map
+              map: 
+                EU: "eu-west-1"
+                US: "us-east-1"
+    - name: dynamodb
+      base:
+        apiVersion: dynamodb.aws.crossplane.io/v1alpha1
+        kind: Table
+        metadata:
+          name: table-dynamodb
+        spec:
+          forProvider:
+            attributeDefinitions:
+              - attributeName: attribute1
+                attributeType: S
+            keySchema:
+              - attributeName: attribute1
+                keyType: HASH
+            provisionedThroughput:
+              readCapacityUnits: 1
+              writeCapacityUnits: 1
+            region:
+          providerConfigRef:
+            name: provider-config-aws
+      patches:
+        - fromFieldPath: "spec.region"
+          toFieldPath: "spec.forProvider.region"
+          transforms:
+            - type: map
+              map: 
+                EU: "eu-west-1"
+                US: "us-east-1"

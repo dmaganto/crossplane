@@ -1,0 +1,10 @@
+apiVersion: my-api.dmaganto.es/v1alpha1
+kind: Database
+metadata:
+  name: test-eu
+  namespace: default
+spec: 
+  region: "EU"
+  compositionRevisionSelector:
+    matchLabels:
+      region: EU

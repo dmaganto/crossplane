@@ -1,7 +1,7 @@
 apiVersion: microservices.dmaganto.infra/v1alpha1
 kind: ECSCluster
 metadata:
-  name: tenant1
+  name: tenant1-dev1
 spec:
   resourceConfig:
     providerConfigName: default

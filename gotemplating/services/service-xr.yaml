@@ -1,18 +1,14 @@
 apiVersion: microservices.dmaganto.infra/v1alpha1
 kind: ECSService
 metadata:
-  name: service
+  name: service-offer-dev1
 spec:
-  compositionSelector:
-    matchLabels:
-      dmaganto.infra/provider: upbound
-      dmaganto.infra/service-type: tenant
   resourceConfig:
     providerConfigName: default
     tenant: tenant1
     name: dmaganto
     deletionPolicy: Delete
-    region: eu-central-1
+    region: eu-west-1
   parameters:
     clusterName: dev1
     family: service-offer
@@ -20,3 +16,19 @@ spec:
     desiredCount: 1
     subnets: ["subnet-0113edbc36b206ba7","subnet-0ceb830d99cd51de9"]
     securityGroups: ["sg-084828be711b1b0ab"]
+    containerDefinitions: |-
+      [
+        {
+          "name": "service-offer",
+          "image": "public.ecr.aws/docker/library/python:alpine",
+          "essential":true,
+          "command": ["python", "-m", "http.server", "8080"],
+          "portMappings": [
+              {
+                  "containerPort": 8080,
+                  "hostPort": 8080,
+                  "protocol": "tcp"
+              }
+          ]
+        }
+      ]

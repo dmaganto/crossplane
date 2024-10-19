@@ -62,6 +62,22 @@ spec:
                     clusterName:
                       description: Cluster Name that is going to be be created and attached
                       type: string
+                  # TASK INPUTS
+                    containerDefinitions:
+                      description: Definition to run the container
+                      type: string
+                    memory:
+                      description: Memory for task
+                      type: string
+                      default: "512"
+                    cpu:
+                      description: CPU for task
+                      type: string
+                      default: "256"
+                  required:
+                    - containerDefinitions
+                    - family
+                    - task_id
                 resourceConfig:
                   description: ResourceConfig defines general properties of this AWS resource.
                   type: object
@@ -94,5 +110,20 @@ spec:
                     - tenant
               required:
                 - parameters
+            status:
+              type: object
+              properties:
+                metadata:
+                  type: object
+                  properties:
+                    managedResources:
+                      type: object
+                      properties:
+                        service:
+                          description: service
+                          type: string
+                        taskDefinition:
+                          description: taskDefinition
+                          type: string
           required:
             - spec

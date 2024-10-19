@@ -30,6 +30,9 @@ spec:
         template: |
           {{- $xr := getCompositeResource . }}
           {{- $s3Bucket := printf "cluster-%s" (get $xr.spec.resourceConfig "tenant") }}
+          {{- $clusteName := printf "%s-%s" (get $xr.spec.resourceConfig "tenant") (get $xr.spec.parameters "clusterName") }}
+          {{- $region := (get $xr.spec.resourceConfig "region") }}
+          {{- $tenant := (get $xr.spec.resourceConfig "tenant") }}
           ---
           apiVersion: meta.gotemplating.fn.crossplane.io/v1alpha1
           kind: ExtraResources
@@ -47,24 +50,24 @@ spec:
           metadata:
             name: {{ $xr.metadata.name }}
             annotations:
-              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xr.metadata.name }}
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $clusteName }}
           status:
             metadata:
               managedResources:
-                region: {{ get $xr.spec.resourceConfig "region" }}
+                region: {{ $region }}
                 cluster:
-                  name: {{ get $xr.spec.resourceConfig "tenant" }}
+                  name: {{ $tenant }}
           ---
           apiVersion: ecs.aws.upbound.io/v1beta1
           kind: Cluster
           metadata:
-            name: {{ get $xr.spec.resourceConfig "tenant" }}
+            name: {{ $clusteName }}
             annotations:
-              gotemplating.fn.crossplane.io/composition-resource-name: {{ $xr.metadata.name }}
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $clusteName }}
           spec:
             deletionPolicy: {{ get $xr.spec.resourceConfig "deletionPolicy" }}
             forProvider:
-              region: {{ get $xr.spec.resourceConfig "region" }}
+              region: {{ $region }}
               tags:
                 s3HostedZoneId: {{ $extraResource.resource.status.atProvider.hostedZoneId }}
           {{- if $xr.spec.parameters.multipleClusters }}
@@ -72,20 +75,20 @@ spec:
           apiVersion: ecs.aws.upbound.io/v1beta1
           kind: Cluster
           metadata:
-            name: {{ printf "%s-1" $xr.spec.resourceConfig.tenant }}
+            name: {{ printf "%s-1" $tenant }}
             annotations:
-              gotemplating.fn.crossplane.io/composition-resource-name: {{ printf "%s-1" $xr.spec.resourceConfig.tenant }}
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ printf "%s-1" $tenant }}
           spec:
             deletionPolicy: {{ get $xr.spec.resourceConfig "deletionPolicy" }}
             forProvider:
-              region: {{ get $xr.spec.resourceConfig "region" }}
+              region: {{ $region }}
           {{- end}}
           {{- if $xr.spec.parameters.capacityProvider }}
           ---
           apiVersion: ecs.aws.upbound.io/v1beta1
           kind: ClusterCapacityProviders
           metadata:
-            name: {{ get $xr.spec.resourceConfig "tenant" }}
+            name: {{ $tenant }}
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: {{ $xr.metadata.name }}
           spec:
@@ -93,117 +96,10 @@ spec:
             forProvider:
               clusterNameSelector:
                 matchControllerRef: true
-              region: {{ get $xr.spec.resourceConfig "region" }}
+              region: {{ $region }}
           {{- end }}
           {{- end }}
           {{- end }}
   - step: automatically-detect-ready-composed-resources
     functionRef:
       name: function-auto-ready
-#  - functionRef:
-#      name: function-patch-and-transform
-#    input:
-#      apiVersion: pt.fn.crossplane.io/v1beta1
-#      environment: null
-#      kind: Resources
-#      patchSets:
-#      - name: common-parameters
-#        patches:
-#        - fromFieldPath: spec.resourceConfig.providerConfigName
-#          toFieldPath: spec.providerConfigRef.name
-#          type: FromCompositeFieldPath
-#        - fromFieldPath: spec.resourceConfig.deletionPolicy
-#          toFieldPath: spec.deletionPolicy
-#          type: FromCompositeFieldPath
-#        - fromFieldPath: spec.resourceConfig.region
-#          toFieldPath: spec.forProvider.region
-#          type: FromCompositeFieldPath
-#        - combine:
-#            strategy: string
-#            string:
-#              fmt: '%s-%s'
-#            variables:
-#            - fromFieldPath: spec.resourceConfig.tenant
-#            - fromFieldPath: spec.parameters.clusterName
-#          toFieldPath: metadata.labels["cluster"]
-#          type: CombineFromComposite
-#        - fromFieldPath: spec.resourceConfig.tenant
-#          toFieldPath: metadata.labels["tenant"]
-#          type: FromCompositeFieldPath
-#      resources:
-#      - base:
-#          apiVersion: ecs.aws.upbound.io/v1beta1
-#          kind: ClusterCapacityProviders
-#          spec:
-#            forProvider:
-#              clusterNameSelector:
-#                matchControllerRef: true
-#              region: null
-#        name: clustercapacityprovider
-#        patches:
-#        - patchSetName: common-parameters
-#          type: PatchSet
-#        readinessChecks:
-#        - matchCondition:
-#            status: "True"
-#            type: Ready
-#          type: MatchCondition
-#        - matchCondition:
-#            status: "True"
-#            type: Synced
-#          type: MatchCondition
-#      - base:
-#          apiVersion: ecs.aws.upbound.io/v1beta1
-#          kind: Cluster
-#          metadata:
-#            labels:
-#              name:
-#          spec:
-#            forProvider:
-#              region:
-#              myfakeoption: test
-#              setting:
-#              - name: containerInsights
-#                value: enabled
-#        name: cluster
-#        patches:
-#        - patchSetName: common-parameters
-#          type: PatchSet
-#        - combine:
-#            strategy: string
-#            string:
-#              fmt: '%s-%s'
-#            variables:
-#            - fromFieldPath: spec.resourceConfig.tenant
-#            - fromFieldPath: spec.parameters.clusterName
-#          toFieldPath: metadata.labels["name"]
-#          type: CombineFromComposite
-#        - combine:
-#            strategy: string
-#            string:
-#              fmt: '%s-%s'
-#            variables:
-#            - fromFieldPath: spec.resourceConfig.tenant
-#            - fromFieldPath: spec.parameters.clusterName
-#          toFieldPath: metadata.name
-#          type: CombineFromComposite
-#        readinessChecks:
-#        - matchCondition:
-#            status: "True"
-#            type: Ready
-#          type: MatchCondition
-#        - matchCondition:
-#            status: "True"
-#            type: Synced
-#          type: MatchCondition
-#    step: patch-and-transform
-#  - step: filter-composed-resources
-#    functionRef:
-#      name: function-cel-filter
-#    input:
-#      apiVersion: cel.fn.crossplane.io/v1beta1
-#      kind: Filters
-#      filters:
-#      - name: cluster
-#        expression: observed.composite.resource.spec.parameters.clusterName == "dev2"
-#        expression: desired.resources['cluster'].resource.spec.forProvider.region == "eu-west-1"

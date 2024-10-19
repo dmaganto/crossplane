@@ -1,0 +1,98 @@
+# Copyright dmaganto.infra, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xecsservices.microservices.dmaganto.infra  # must be spec.names.plural+"."+spec.group
+spec:
+  group: microservices.dmaganto.infra
+  names:
+    kind: XECSService      # cluster scope type
+    plural: xecsservices
+  claimNames:              # namespace scope type
+    kind: ECSService
+    plural: ecsservices # lowercase only
+  versions:
+    - name: v1alpha1
+      additionalPrinterColumns:
+      - jsonPath: .status.conditions[?(@.type=='Ready')].status
+        name: READY
+        type: string
+      - jsonPath: .status.conditions[?(@.type=='Synced')].status
+        name: SYNCED
+        type: string
+      - jsonPath: .metadata.creationTimestamp
+        name: AGE
+        type: date
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  description: Application Inputs
+                  type: object
+                  properties:
+                  # SERVICE INPUTS
+                    desiredCount:
+                      description: The number of instances of the task definition to place and keep running.
+                      type: integer
+                      default: 1
+                    securityGroups:
+                      description: The security groups associated with the task or service.
+                      type: array
+                      items:
+                        type: string
+                    subnets:
+                      description: The subnets associated with the task or service.
+                      type: array
+                      items:
+                        type: string
+                    task_id:
+                      description: Task definition ID as unique identificator
+                      type: string
+                    family:
+                      description: The name of a family that this task definition is registered to.
+                      type: string
+                    clusterName:
+                      description: Cluster Name that is going to be be created and attached
+                      type: string
+                resourceConfig:
+                  description: ResourceConfig defines general properties of this AWS resource.
+                  type: object
+                  properties:
+                    deletionPolicy:
+                      description: Defaults to Delete
+                      enum:
+                        - Delete
+                        - Orphan
+                      type: string
+                    name:
+                      description: Set the name of this resource in AWS to the value provided by this field.
+                      type: string
+                    providerConfigName:
+                      type: string
+                    region:
+                      description: Region where the cluster is going to be created
+                      type: string
+                      default: eu-central-1
+                    tenant:
+                      description: Name of tenant
+                      type: string
+                    env:
+                      description: environment
+                      type: string
+                  required:
+                    - providerConfigName
+                    - name
+                    - region
+                    - tenant
+              required:
+                - parameters
+          required:
+            - spec

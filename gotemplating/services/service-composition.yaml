@@ -1,0 +1,93 @@
+# Copyright dmaganto.infra, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: ecsservice.microservices.dmaganto.infra
+  labels:
+    dmaganto.infra/provider: upbound
+    dmaganto.infra/service-type: tenant
+spec:
+  compositeTypeRef:
+    apiVersion: microservices.dmaganto.infra/v1alpha1
+    kind: XECSService
+  patchSets:
+    - name: common-parameters
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.resourceConfig.providerConfigName
+          toFieldPath: spec.providerConfigRef.name
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.resourceConfig.deletionPolicy
+          toFieldPath: spec.deletionPolicy
+        - fromFieldPath: spec.resourceConfig.region
+          toFieldPath: spec.forProvider.region
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.resourceConfig.tenant
+          toFieldPath: metadata.labels["tenant"]
+          type: FromCompositeFieldPath
+  resources:
+    - name: service
+      base:
+        apiVersion: ecs.aws.upbound.io/v1beta1
+        kind: Service
+        spec:
+          forProvider:
+            desiredCount:
+            clusterSelector:
+              matchLabels:
+                cluster:
+            launchType: FARGATE
+            networkConfiguration:
+            - assignPublicIp: false
+              securityGroups:
+              subnets:
+            propagateTags: TASK_DEFINITION
+            region:
+            taskDefinitionSelector:
+              matchLabels:
+                taskdefinition:
+      patches:
+        - type: PatchSet
+          patchSetName: common-parameters
+        - fromFieldPath: spec.parameters.desiredCount
+          toFieldPath: spec.forProvider.desiredCount
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.parameters.securityGroups
+          toFieldPath: spec.forProvider.networkConfiguration[0].securityGroups
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.parameters.subnets
+          toFieldPath: spec.forProvider.networkConfiguration[0].subnets
+          type: FromCompositeFieldPath
+        - fromFieldPath: spec.parameters.family
+          toFieldPath: metadata.name
+          type: FromCompositeFieldPath
+        - type: CombineFromComposite
+          combine:
+            variables:
+              - fromFieldPath: spec.resourceConfig.tenant
+              - fromFieldPath: spec.parameters.family
+              - fromFieldPath: spec.parameters.task_id
+            strategy: string
+            string:
+              fmt: "%s-%s-%s"
+          toFieldPath: spec.forProvider.taskDefinitionSelector.matchLabels["taskdefinition"]
+        - type: CombineFromComposite
+          combine:
+            variables:
+              - fromFieldPath: spec.resourceConfig.tenant
+              - fromFieldPath: spec.parameters.clusterName
+            strategy: string
+            string:
+              fmt: "%s-%s"
+          toFieldPath: spec.forProvider.clusterSelector.matchLabels["cluster"]
+      readinessChecks:
+        - type: MatchCondition
+          matchCondition:
+            status: 'True'
+            type: Ready
+        - type: MatchCondition
+          matchCondition:
+            type: Synced
+            status: 'True'

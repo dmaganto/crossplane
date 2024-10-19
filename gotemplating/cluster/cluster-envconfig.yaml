@@ -1,0 +1,10 @@
+apiVersion: apiextensions.crossplane.io/v1alpha1
+kind: EnvironmentConfig
+metadata:
+  name: tenant1-config
+data:
+  alb: xxxx
+  kms: yyyy
+  securityGroup:
+    ecs: zzzz
+    alb: wwww

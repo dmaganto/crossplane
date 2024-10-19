@@ -1,0 +1,15 @@
+apiVersion: microservices.dmaganto.infra/v1alpha1
+kind: ECSCluster
+metadata:
+  name: tenant1
+spec:
+  resourceConfig:
+    providerConfigName: default
+    tenant: tenant1
+    name: tenant1
+    deletionPolicy: Delete
+    region: eu-west-1
+  parameters:
+    clusterName: dev1
+    capacityProvider: false
+    multipleClusters: false

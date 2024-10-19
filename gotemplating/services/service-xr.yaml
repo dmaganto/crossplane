@@ -1,0 +1,22 @@
+apiVersion: microservices.dmaganto.infra/v1alpha1
+kind: ECSService
+metadata:
+  name: service
+spec:
+  compositionSelector:
+    matchLabels:
+      dmaganto.infra/provider: upbound
+      dmaganto.infra/service-type: tenant
+  resourceConfig:
+    providerConfigName: default
+    tenant: tenant1
+    name: dmaganto
+    deletionPolicy: Delete
+    region: eu-central-1
+  parameters:
+    clusterName: dev1
+    family: service-offer
+    task_id: "202424"
+    desiredCount: 1
+    subnets: ["subnet-0113edbc36b206ba7","subnet-0ceb830d99cd51de9"]
+    securityGroups: ["sg-084828be711b1b0ab"]

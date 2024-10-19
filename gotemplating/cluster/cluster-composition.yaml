@@ -29,7 +29,7 @@ spec:
       inline:
         template: |
           {{- $xr := getCompositeResource . }}
-          {{- $s3Bucket := "bucket-dmaganto-crossplane" }}
+          {{- $s3Bucket := printf "cluster-%s" (get $xr.spec.resourceConfig "tenant") }}
           ---
           apiVersion: meta.gotemplating.fn.crossplane.io/v1alpha1
           kind: ExtraResources
@@ -94,7 +94,7 @@ spec:
               clusterNameSelector:
                 matchControllerRef: true
               region: {{ get $xr.spec.resourceConfig "region" }}
-          {{- end}}
+          {{- end }}
           {{- end }}
           {{- end }}
   - step: automatically-detect-ready-composed-resources

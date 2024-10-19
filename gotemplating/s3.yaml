@@ -2,11 +2,11 @@ apiVersion: s3.aws.upbound.io/v1beta1
 kind: Bucket
 metadata:
   annotations:
-    crossplane.io/composition-resource-name: bucket-dmaganto-crossplane
-    crossplane.io/external-name: bucket-dmaganto-crossplane
+    crossplane.io/composition-resource-name: cluster-tenant1
+    crossplane.io/external-name: cluster-tenant1
   labels:
-    testing.upbound.io/example-name: bucket-dmaganto-crossplane
-  name: bucket-dmaganto-crossplane
+    testing.upbound.io/example-name: cluster-tenant1
+  name: cluster-tenant1
 spec:
   forProvider:
     region: eu-west-1

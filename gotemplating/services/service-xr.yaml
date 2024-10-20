@@ -20,13 +20,13 @@ spec:
       [
         {
           "name": "service-offer",
-          "image": "public.ecr.aws/docker/library/python:alpine",
+          "image": "public.ecr.aws/docker/library/python:3.12-alpine",
           "essential":true,
-          "command": ["python", "-m", "http.server", "8080"],
+          "command": ["python", "-m", "http.server", "8085"],
           "portMappings": [
               {
-                  "containerPort": 8080,
-                  "hostPort": 8080,
+                  "containerPort": 8085,
+                  "hostPort": 8085,
                   "protocol": "tcp"
               }
           ]

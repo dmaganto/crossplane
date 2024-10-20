@@ -86,9 +86,12 @@ spec:
           apiVersion: ecs.aws.upbound.io/v1beta1
           kind: TaskDefinition
           metadata:
+            labels:
+              taskDefId: {{ printf "%s-%s" $family $taskHash }}
             name: {{ printf "%s-%s" $family $taskHash }}
             annotations:
-              {{ setResourceNameAnnotation $taskDef }}
+              {{ setResourceNameAnnotation (printf "%s-%s" $family $taskHash) }}
+              taskDefId: {{ printf "%s-%s" $family $taskHash }}k
           spec:
             forProvider:
               containerDefinitions: {{ $containerDefinitions | quote}}

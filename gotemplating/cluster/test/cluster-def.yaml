@@ -1,0 +1,66 @@
+# Copyright dmaganto.infra, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xdmagantos.microservices.dmaganto.infra  # must be spec.names.plural+"."+spec.group
+spec:
+  group: microservices.dmaganto.infra
+  names:
+    kind: XDMaganto      # cluster scope type
+    plural: xdmagantos
+  claimNames:            # namespace scope type
+    kind: DMaganto
+    plural: dmagantos    # lowercase only
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                resourceConfig:
+                  description: ResourceConfig defines general properties of this AWS resource.
+                  type: object
+                  properties:
+                    deletionPolicy:
+                      description: Defaults to Delete
+                      enum:
+                        - Delete
+                        - Orphan
+                      type: string
+                    name:
+                      description: Set the name of this resource in AWS to the value provided by this field.
+                      type: string
+                    providerConfigName:
+                      type: string
+                    region:
+                      description: Region where the cluster is going to be created
+                      type: string
+                      default: eu-central-1
+                    tenant:
+                      description: Name of tenant
+                      type: string
+                    env:
+                      description: environment
+                      type: string
+                    tags:
+                      additionalProperties:
+                        type: string
+                      description: Key-value map of resource tags.
+                      type: object
+                      x-kubernetes-map-type: granular
+                  required:
+                    - providerConfigName
+                    - name
+                    - region
+                    - tenant
+              required:
+                - resourceConfig
+          required:
+            - spec

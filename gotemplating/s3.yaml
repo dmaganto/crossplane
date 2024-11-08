@@ -10,3 +10,16 @@ metadata:
 spec:
   forProvider:
     region: eu-west-1
+---
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: cluster-tenant2
+    crossplane.io/external-name: cluster-tenant2
+  labels:
+    testing.upbound.io/example-name: cluster-tenant2
+  name: cluster-tenant2
+spec:
+  forProvider:
+    region: eu-west-1

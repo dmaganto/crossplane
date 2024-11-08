@@ -1,0 +1,45 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xdmaganto.microservices.dmaganto.infra
+spec:
+  compositeTypeRef:
+    apiVersion: microservices.dmaganto.infra/v1alpha1
+    kind: XDMaganto
+  mode: Pipeline
+  pipeline:
+  - step: go-templating-resources
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $xr := getCompositeResource . }}
+          {{- $region := (get $xr.spec.resourceConfig "region") }}
+          {{- $tenant := (get $xr.spec.resourceConfig "tenant") }}
+
+          {{- define "ecsTags" -}}
+          {{- $xr := getCompositeResource . }}
+          {{- if $xr.spec.resourceConfig.tags }}
+          {{- range $key, $value := $xr.spec.resourceConfig.tags }}
+          {{ $key }}: {{ $value }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          ---
+          apiVersion: ecs.aws.upbound.io/v1beta1
+          kind: Cluster
+          metadata:
+            name: {{ $tenant }}
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: {{ $tenant }}
+          spec:
+            deletionPolicy: {{ get $xr.spec.resourceConfig "deletionPolicy" }}
+            forProvider:
+              region: {{ $region }}
+              tags:
+                Name: {{ $tenant }}
+                {{- include "ecsTags" . | nindent 8 }}

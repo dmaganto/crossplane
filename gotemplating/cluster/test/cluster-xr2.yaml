@@ -1,0 +1,11 @@
+apiVersion: microservices.dmaganto.infra/v1alpha1
+kind: XDMaganto
+metadata:
+  name: tenant2-dev2
+spec:
+  resourceConfig:
+    providerConfigName: default
+    tenant: tenant2
+    name: tenant2
+    deletionPolicy: Delete
+    region: eu-west-1

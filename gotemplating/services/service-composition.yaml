@@ -43,7 +43,6 @@ spec:
           {{- $taskHash := trunc 10 (sha256sum (toJson $containerDefinitions)) }}
           {{- $TaskDefRes := getComposedResource . $taskDef }}
           {{- $TaskDefRev := printf "%v" (get $TaskDefRes.status.atProvider "revision") }}
-          {{- $TaskDefArn := get $TaskDefRes.status.atProvider "arn" }}
 
           ---
           apiVersion: microservices.dmaganto.infra/v1alpha1
@@ -57,6 +56,28 @@ spec:
               managedResources:
                 service: {{ $xr.metadata.name }}
                 taskDefinition: {{ printf "%s-%s" $family $taskHash }}
+          ---
+          apiVersion: ecs.aws.upbound.io/v1beta1
+          kind: TaskDefinition
+          metadata:
+            labels:
+              taskDefId: {{ printf "%s-%s" $family $taskHash }}
+            name: {{ printf "%s-%s" $family $taskHash }}
+            annotations:
+              {{ setResourceNameAnnotation (printf "%s-%s" $family $taskHash) }}
+              taskDefId: {{ printf "%s-%s" $family $taskHash }}k
+          spec:
+            forProvider:
+              containerDefinitions: {{ $containerDefinitions | quote}}
+              networkMode: awsvpc
+              family: {{ $family }}
+              region: {{ $region}}
+              requiresCompatibilities:
+              - FARGATE
+              memory: {{ $memory | quote }}
+              cpu: {{ $cpu | quote }}
+            managementPolicies: ["Create", "Delete", "LateInitialize", "Observe"]
+          {{- $TaskDefArn := get $TaskDefRes.status.atProvider "arn" }}
           ---
           apiVersion: ecs.aws.upbound.io/v1beta1
           kind: Service
@@ -81,28 +102,9 @@ spec:
                   {{- end }}
               propagateTags: TASK_DEFINITION
               region: {{ $region }}
-              taskDefinition: {{ $TaskDefArn }}
-          ---
-          apiVersion: ecs.aws.upbound.io/v1beta1
-          kind: TaskDefinition
-          metadata:
-            labels:
-              taskDefId: {{ printf "%s-%s" $family $taskHash }}
-            name: {{ printf "%s-%s" $family $taskHash }}
-            annotations:
-              {{ setResourceNameAnnotation (printf "%s-%s" $family $taskHash) }}
-              taskDefId: {{ printf "%s-%s" $family $taskHash }}k
-          spec:
-            forProvider:
-              containerDefinitions: {{ $containerDefinitions | quote}}
-              networkMode: awsvpc
-              family: {{ $family }}
-              region: {{ $region}}
-              requiresCompatibilities:
-              - FARGATE
-              memory: {{ $memory | quote }}
-              cpu: {{ $cpu | quote }}
-            managementPolicies: ["Create", "Delete", "LateInitialize", "Observe"]
+              #taskDefinition: {{ $TaskDefArn }}
+              taskDefinition: {{ $family }}
+              
   - step: automatically-detect-ready-composed-resources
     functionRef:
       name: function-auto-ready
